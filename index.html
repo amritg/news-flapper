@@ -3,26 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <title>Flapper News</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular.min.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.10/angular-ui-router.js"></script>
     <script src="app.js"></script>
+    <style>
+        .glyphicon-thumbs-up {
+            cursor: pointer;
+        }
+        #all-posts{
+            font-size: 20px;
+            text-align: center;
+        }
+    </style>
+
 </head>
-<body ng-app="flapperNews" ng-controller="MainCtrl">
-    <div>
-        {{test}}
-    </div>
-    <div ng-repeat="post in posts | orderBy: '-upvotes'">
-        <div ng-show="post.link">
-        <span ng-click="incrementUpVotes(post)">^</span>
-        <a href="{{post.link}}">{{post.title}}</a>
-         - upvotes: {{post.upvotes}}
+<body ng-app="flapperNews">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 col-md-offset-3">
+                <ui-view></ui-view>
+            </div>
         </div>
-        
     </div>
-    <form ng-submit="addPost()">
-        <input type="text" placeholder="Title" ng-model="title"><br>
-        <input type="text" placeholder = "Link" ng-model="link"><br>
-        <input type="submit" value="Post">
-    </form>
-    <!--<button ng-click="addPost()">Post</button>-->
 </body>
 </html>

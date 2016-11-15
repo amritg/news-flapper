@@ -10,18 +10,46 @@
             if(!$scope.title || $scope.title === ''){
                 return;
             }
-            $scope.posts.push({title: $scope.title, link: $scope.link, upvotes: 0});
+            $scope.posts.push({
+                title: $scope.title,
+                link: $scope.link,
+                upvotes: 0,
+                comments: [
+                    {author: 'Joe', body: 'Cool post!', upvotes: 0},
+                    {author: 'Bob', body: 'Great idea but everything is wrong!', upvotes: 0},
+                ]
+            });
             $scope.title = '';
             $scope.link = '';
         };
 
         $scope.incrementUpVotes = function(post){
-            post.upvotes += 1;
+            posts.incrementByOne(post);
         };
     }]);
 
+    app.controller('PostsCtrl',['$scope','$stateParams','posts',function($scope,$stateParams,posts){
+        $scope.post = posts.posts[$stateParams.id];
+        
+        $scope.incrementUpVotes = function(comment){
+            posts.incrementByOne(comment);
+        };
+
+        $scope.addComment = function(){
+            console.log($scope);
+            if($scope.body === ""){return;}
+            $scope.post.comments.push({
+                body: $scope.body,
+                author: 'user',
+                upvotes: 0
+            });
+            $scope.body = '';
+        }
+    }]);
+
     app.factory('posts',[function(){
-        var  o = {
+        var service = this;
+        service = {
             posts: [
                 {title:'post 1', link:'link1', upvotes: 5},
                 {title:'post 2', link:'link2', upvotes: 2},
@@ -30,7 +58,10 @@
                 {title:'post 5', link:'link5', upvotes: 4}
             ]
         };
-        return o;
+         service.incrementByOne = function(value){
+             value.upvotes += 1;
+         }
+        return service;
     }]);
 
     app.config([
@@ -42,6 +73,11 @@
                     url: '/home',
                     templateUrl: '/home.html',
                     controller: 'MainCtrl'
+                })
+                .state('posts',{
+                    url: '/posts/{id}',
+                    templateUrl:'/posts.html',
+                    controller: 'PostsCtrl'
                 });
             $urlRouterProvider.otherwise('home');
         }

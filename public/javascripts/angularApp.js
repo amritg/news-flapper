@@ -1,30 +1,23 @@
 (function (){
     var app = angular.module('flapperNews',['ui.router']);
 
-    app.controller('MainCtrl',['$scope','posts',function($scope,posts){
-        $scope.test = "Hello world!";
-        $scope.title = "";
-        $scope.link = "";
-        $scope.posts = posts.posts;
+    app.controller('MainCtrl',['$scope','posts','allPost',function($scope,posts,allPost){
+         $scope.posts = posts.posts;
+         
         $scope.addPost = function(){
             if(!$scope.title || $scope.title === ''){
                 return;
             }
-            $scope.posts.push({
+            posts.create({
                 title: $scope.title,
-                link: $scope.link,
-                upvotes: 0,
-                comments: [
-                    {author: 'Joe', body: 'Cool post!', upvotes: 0},
-                    {author: 'Bob', body: 'Great idea but everything is wrong!', upvotes: 0},
-                ]
+                link: $scope.link
             });
             $scope.title = '';
             $scope.link = '';
         };
 
         $scope.incrementUpVotes = function(post){
-            posts.incrementByOne(post);
+            posts.upvote(post);
         };
     }]);
 
@@ -47,20 +40,35 @@
         }
     }]);
 
-    app.factory('posts',[function(){
+    app.factory('posts',['$http',function($http){
         var service = this;
-        service = {
-            posts: [
-                {title:'post 1', link:'link1', upvotes: 5},
-                {title:'post 2', link:'link2', upvotes: 2},
-                {title:'post 3', link:'link3', upvotes: 15},
-                {title:'post 4', link:'link4', upvotes: 9},
-                {title:'post 5', link:'link5', upvotes: 4}
-            ]
-        };
-         service.incrementByOne = function(value){
+        service.posts = [];
+
+        service.incrementByOne = function(value){
              value.upvotes += 1;
-         }
+        }
+
+        service.getAll = function(){
+            return $http.get('/posts').success(function(data){
+                angular.copy(data, service.posts);
+            });
+        }
+
+        service.create = function(post){
+            $http.post('/posts', post).then(function(response){
+                console.log(response);
+                service.posts.push(response.data);
+            });
+        }
+
+        service.upvote = function(post){
+            $http.put('/posts/' + post._id + '/upvote').then(function(response){
+                console.log(response);
+                post.upvotes += 1;
+                console.log(response.data.upvotes);
+                console.log(post.upvotes);
+            });
+        }
         return service;
     }]);
 
@@ -72,7 +80,12 @@
                 .state('home',{
                     url: '/home',
                     templateUrl: '/home.html',
-                    controller: 'MainCtrl'
+                    controller: 'MainCtrl',
+                    resolve: {
+                        allPost: function(posts){
+                            return posts.getAll();
+                        }
+                    }
                 })
                 .state('posts',{
                     url: '/posts/{id}',

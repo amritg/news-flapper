@@ -21,20 +21,21 @@
         };
     }]);
 
-    app.controller('PostsCtrl',['$scope','$stateParams','posts',function($scope,$stateParams,posts){
-        $scope.post = posts.posts[$stateParams.id];
-        
+    app.controller('PostsCtrl',['$scope','posts','allComment',function($scope,posts,allComment){
+        $scope.post = allComment;
         $scope.incrementUpVotes = function(comment){
             posts.incrementByOne(comment);
         };
 
         $scope.addComment = function(){
-            console.log($scope);
             if($scope.body === ""){return;}
-            $scope.post.comments.push({
+            posts.addComment($scope.post._id,{
                 body: $scope.body,
                 author: 'user',
                 upvotes: 0
+            }).success(function(comment){
+                 console.log(comment);
+                 $scope.post.comments.push(comment);
             });
             $scope.body = '';
         }
@@ -48,9 +49,14 @@
              value.upvotes += 1;
         }
 
-        service.getAll = function(){
+        service.getAllPost = function(){
             return $http.get('/posts').success(function(data){
                 angular.copy(data, service.posts);
+            });
+        }
+        service.getAllComment = function(id){
+            return $http.get('/posts/' +id).then(function(response){
+                return response.data;
             });
         }
 
@@ -69,6 +75,9 @@
                 console.log(post.upvotes);
             });
         }
+        service.addComment = function(id,comment){
+           return $http.post('/posts/' + id + '/comments', comment);
+        }
         return service;
     }]);
 
@@ -83,14 +92,19 @@
                     controller: 'MainCtrl',
                     resolve: {
                         allPost: function(posts){
-                            return posts.getAll();
+                            return posts.getAllPost();
                         }
                     }
                 })
                 .state('posts',{
                     url: '/posts/{id}',
                     templateUrl:'/posts.html',
-                    controller: 'PostsCtrl'
+                    controller: 'PostsCtrl',
+                    resolve: {
+                        allComment: ['$stateParams', 'posts', function($stateParams, posts) {
+                            return posts.getAllComment($stateParams.id);
+                        }]
+                    }
                 });
             $urlRouterProvider.otherwise('home');
         }

@@ -52,16 +52,17 @@ router.post('/posts/:post/comments',function(req, res, next){
     
             var comment = new Comment(req.body);
     
-            comment.post = post;
+            // comment.post = post;
+            post.comments.push(comment);
+
+            post.save(function(err,post){
+                if(err) {return next(err);}     
+            });
 
             comment.save(function(err, comment){
+                console.log(comment);
                 if(err){ return next(err);}
-                post.comments.push(comment);
-
-                post.save(function(err,post){
-                    if(err) {return next(err);}
-                    res.json(post);
-                });
+                res.json(comment);   
             });
         });
 });

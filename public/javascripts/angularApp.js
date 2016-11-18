@@ -50,25 +50,25 @@
         }
 
         service.getAllPost = function(){
-            return $http.get('/posts').success(function(data){
+            return $http.get('/api/posts').success(function(data){
                 angular.copy(data, service.posts);
             });
         }
         service.getAllComment = function(id){
-            return $http.get('/posts/' +id).then(function(response){
+            return $http.get('/api/posts/' +id).then(function(response){
                 return response.data;
             });
         }
 
         service.create = function(post){
-            $http.post('/posts', post).then(function(response){
+            $http.post('/api/posts', post).then(function(response){
                 console.log(response);
                 service.posts.push(response.data);
             });
         }
 
         service.upvote = function(post){
-            $http.put('/posts/' + post._id + '/upvote').then(function(response){
+            $http.put('/api/posts/' + post._id + '/upvote').then(function(response){
                 console.log(response);
                 post.upvotes += 1;
                 console.log(response.data.upvotes);
@@ -76,7 +76,7 @@
             });
         }
         service.addComment = function(id,comment){
-           return $http.post('/posts/' + id + '/comments', comment);
+           return $http.post('/api/posts/' + id + '/comments', comment);
         }
         return service;
     }]);

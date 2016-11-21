@@ -13,7 +13,7 @@ var app = express();
 // Connection to Mongo Server =============================
 
 var config = require('./config/db');
-var mongoUrl = config.MONGODB_URI;
+var mongoUrl = config.mongoUrl;
 
 var mongoose = require('mongoose');
 mongoose.connect(mongoUrl);
